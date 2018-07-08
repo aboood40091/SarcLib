@@ -77,6 +77,12 @@ def guessFileExt(data):
     elif data[:4] == b'FRES':
         return ".bfres"
 
+    elif data[:4] == b'AAHS':
+        return ".sharc"
+
+    elif data[:4] == b'BAHS':
+        return ".sharcfb"
+
     elif data[:4] == b'FSHA':
         return ".bfsha"
 
@@ -497,7 +503,7 @@ class SARC_Archive(FileArchive):
         elif data[:8] in [b'BNTX\0\0\0\0', b'BNSH\0\0\0\0', b'FSHA    ']:  # Switch GPU data
             return 0x1000
 
-        elif data[:4] in [b'Gfx2', b'FRES'] or data[-0x28:-0x24] == b'FLIM':  # Wii U GPU data and Wii U/Switch Binary Resources
+        elif data[:4] in [b'Gfx2', b'FRES', b'AAHS', b'BAHS'] or data[-0x28:-0x24] == b'FLIM':  # Wii U GPU data and Wii U/Switch Binary Resources
             return 0x2000
 
         elif data[:4] == b'CTPK':  # 3DS Texture package
@@ -602,13 +608,12 @@ class SARC_Archive(FileArchive):
         # Create the File Data table
         fileDataTable = b''
         for idx, file in enumerate(files):
-            if idx > 0:
-                # Align the data
-                alignment = self.getDataAlignment(file[0].data)
-                totalFileLen = round_up(len(fileDataTable), alignment)
-                maxAlignment = max(maxAlignment, alignment)
+            # Align the data
+            alignment = self.getDataAlignment(file[0].data)
+            totalFileLen = round_up(len(fileDataTable), alignment)
+            maxAlignment = max(maxAlignment, alignment)
 
-                fileDataTable += b'\x00' * (totalFileLen - len(fileDataTable))
+            fileDataTable += b'\x00' * (totalFileLen - len(fileDataTable))
 
             # Add the data offset, this will be used later
             file.append(len(fileDataTable))
