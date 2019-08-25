@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # SarcLib - A library for handling the Nintendo SARC archive format
-# Copyright (C) 2015-2018 RoadrunnerWMC, MasterVermilli0n / AboodXD
+# Copyright (C) 2015-2019 RoadrunnerWMC, MasterVermilli0n / AboodXD
 
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -115,6 +115,9 @@ def guessFileExt(data):
 
     elif data[:2] in [b'YB', b'BY']:
         return ".byml"
+
+    elif data[0xC:0x10] == b'SCDL':
+        return ".bcd"
 
     else:
         return ".bin"
@@ -518,6 +521,9 @@ class SARC_Archive(FileArchive):
         elif (data[:2] in [b'YB', b'BY']
                   or data[:8] in [b'MsgStdBn', b'MsgPrjBn']):  # Binary text
             return 0x80
+
+        elif data[0xC:0x10] == b'SCDL':  # SMM2 Course data
+            return 0x100
 
         else:
             return 4
